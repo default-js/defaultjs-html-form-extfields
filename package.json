@@ -2,7 +2,7 @@
 	"name": "@default-js/defaultjs-html-form-extfields",
 	"buildname": "defaultjs-html-form-extfields",
 	"version": "1.0.0-beta.1",
-	"description": "extention for defaultjs-html-form with more and complex fields-",
+	"description": "Extention for defaultjs-html-form with more and complex fields.",
 	"main": "./index.js",
 	"scripts": {
 		"build:only": "webpack --config webpack.prod.js && webpack --config webpack.dev.js",
@@ -43,8 +43,10 @@
 	"homepage": "https://github.com/default-js/defaultjs-html-form-extfields#readme",
 	"dependencies": {
 		"@default-js/defaultjs-common-utils": "^0.6.0",
+		"@default-js/defaultjs-dynamic-requester": "^1.0.0-beta.1",
 		"@default-js/defaultjs-expression-language": "^1.0.0-beta.11",
-		"@default-js/defaultjs-extdom": "^1.0.0-beta.20"
+		"@default-js/defaultjs-extdom": "^1.0.0-beta.20",
+		"@default-js/defaultjs-html-form": "^1.0.0-beta.1"
 	},
 	"directories": {
 		"test": "test"
