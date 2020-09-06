@@ -1,2 +1,3 @@
 import "@default-js/defaultjs-extdom";
-import "./browser.js";
+import "@default-js/defaultjs-html-form/browser";
+import "./browser";
