@@ -12,7 +12,12 @@
 	<body>
         <d-form use-summary-page>
 			<d-page>
-                <d-selection-list request="{url:''}">
+                <d-selection-list>
+					<d-request>
+						{
+							"url":"./data/1.json"
+						}
+					</d-request>
                     <template>
                         <span>${text}</span>
                     </template>
