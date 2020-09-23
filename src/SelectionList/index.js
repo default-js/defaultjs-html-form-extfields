@@ -1,13 +1,17 @@
 import "@default-js/defaultjs-html-components/src/components/Pagination";
-import { NODENAME as RequestNodeName } from "./Request";
+import Request, { NODENAME as RequestNodeName } from "./Request";
+import Item, { NODENAME as ItemNodeName } from "./Item";
 import BaseField from "@default-js/defaultjs-html-form/src/BaseField";
 import { HTML_TAG_PREFIX } from "@default-js/defaultjs-html-form/src/Constants";
 import { Renderer, Template } from "@default-js/defaultjs-template-language";
+import Resolver from "@default-js/defaultjs-expression-language/src/ExpressionResolver";
 
 export const NODENAME = HTML_TAG_PREFIX + "selection-list";
-const ATTR_REQUEST = "request";
 const ATTR_TEMPLATE = "template";
-const ATTRIBUTES = [ATTR_REQUEST, ATTR_TEMPLATE];
+const ATTR_REQUEST_PAGE_SIZE = "request-page-size";
+const ATTR_RESPONSE_ITEMS = "response-items";
+const ATTR_RESPONSE_PAGE_COUNT = "response-page-count";
+const ATTRIBUTES = [ATTR_TEMPLATE, ATTR_RESPONSE_ITEMS, ATTR_RESPONSE_PAGE_COUNT, ATTR_REQUEST_PAGE_SIZE];
 const TEMPLATE = `
 <div class="${NODENAME}-filter"><input class="${NODENAME}-filter-input" type="text">
 	<button class="${NODENAME}-filter-button">filter</button>
@@ -15,7 +19,7 @@ const TEMPLATE = `
 <div class="${NODENAME}-content"></div>
 <d-pagination class="${NODENAME}-pagination" size="9" disable-shadow-dom></d-pagination>`;
 
-const getTemplate = (node) => {
+const getItemTemplate = (node) => {
 	let template = node.find(":scope > template").first();
 	if (!!template) return template;
 	const value = node.attr(ATTR_TEMPLATE);
@@ -27,13 +31,21 @@ const getTemplate = (node) => {
 	return new URL(value, location.href);
 };
 
-const execute = async (field) => {
-	const { request, container, form, renderer } = field;
-	let data = await request.execute({ context: form.data });
-	data = await data.json();
-	renderer.render({ container, data });
-};
+const buildTemplate = async (node) => {
+	const itemTemplate = await Template.load(getItemTemplate(node));
+	const template = create(
+		`
+	<jstl jstl-foreach="\${$items}" jstl-foreach-var="$data">
+		<${ItemNodeName} item-index="\${status.index}"></${ItemNodeName}>
+	</jstl>
+	`,
+		true,
+	);
 
+	const container = template.content.find(ItemNodeName).first();
+	container.append(itemTemplate.template.content.childNodes);
+	return Template.load(template, false);
+};
 class SelectionList extends BaseField {
 	static get observedAttributes() {
 		return ATTRIBUTES.concat(BaseField.observedAttributes);
@@ -42,9 +54,19 @@ class SelectionList extends BaseField {
 	constructor() {
 		super();
 		this.initialized = false;
+
+		this.on("d-pagination-to-page", (event) => {
+			const {target, detail:[page]} = event;
+
+			this.context.$paging.page = page;
+			this.render();
+			event.preventDefault();
+			event.stopPropagation();
+		})
 	}
 
 	async init() {
+		this.initialized = false;
 		this.initSelectionList();
 	}
 
@@ -57,19 +79,49 @@ class SelectionList extends BaseField {
 		this.pagination = this.find("d-pagination").first();
 		this.request = this.find(RequestNodeName).first();
 
-		const template = await Template.load(getTemplate(this));
+		const template = await buildTemplate(this);
 		this.renderer = new Renderer({ template });
-		if (this.active) execute(this);
+
+		this.context = {
+			$input: {},
+			$paging: {
+				page: 1,
+				pages: 0,
+				pageSize: parseInt(this.attr(ATTR_REQUEST_PAGE_SIZE) || "10"),
+			},
+		};
+
+		if (this.active) this.render();
 		this.initialized = true;
 	}
 
 	async activeUpdated() {
-		if (this.active && this.initialized) execute(this);
+		if (this.active && this.initialized) this.render();
 	}
 
 	readonlyUpdated() {}
 
 	async updatedValue() {}
+
+	async render () {
+		if(!this.initialized) return;
+
+		const { request, container, form, renderer, pagination, context } = this;
+		let response = await request.execute({
+			context: {
+				$data: form.data,
+				$paging: context.$paging,
+			}
+		});
+		response = await response.json();
+		context.$response = response;
+		context.$items = await Resolver.resolve(this.attr(ATTR_RESPONSE_ITEMS), context, []);
+		context.$paging.pages = await Resolver.resolve(this.attr(ATTR_RESPONSE_PAGE_COUNT), context, 0);
+	
+		renderer.render({ container, data: context });
+	
+		pagination.attr("page", context.$paging.page).attr("count", context.$paging.pages);
+	};
 }
 
 customElements.define(NODENAME, SelectionList);

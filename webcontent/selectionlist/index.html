@@ -12,14 +12,14 @@
 	<body>
         <d-form use-summary-page>
 			<d-page>
-                <d-selection-list>
+                <d-selection-list request-page-size="5" response-items="${$response.results}" response-page-count="${Math.ceil($response.total / $paging.pageSize)}">
 					<d-request>
 						{
-							"url":"./data/1.json"
+							"url":"./data/${$paging.page}.json"
 						}
 					</d-request>
                     <template>
-                        <span>${text}</span>
+                        <span>${JSON.stringify($data)}</span>
                     </template>
                 </d-selection-list>
             </d-page>
