@@ -23,11 +23,14 @@ class HTMLFormTagFieldInputValidation extends Component {
 		await super.init();
 
 		if (!this.#initialized) {
-			this.#condition = (this.attr(ATTR__CONDITION) || this.#condition);
+			this.#condition = (this.attr(ATTR__CONDITION) || "").trim();
 		}
 	}
 
 	async validate(value) {
+		if(!this.#condition.length == 0)
+			return true;
+
 		const valid =  await ExpressionResolver.resolve(this.#condition, { $value: value }, false);
 		this.attr(MARKER__ACTIVE, valid ? null : "");		
 		
@@ -35,5 +38,5 @@ class HTMLFormTagFieldInputValidation extends Component {
 	}
 };
 
-define(HTMLTagFieldInputValidation);
-export default HTMLTagFieldInputValidation;
+define(HTMLFormTagFieldInputValidation);
+export default HTMLFormTagFieldInputValidation;
