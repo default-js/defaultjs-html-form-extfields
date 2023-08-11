@@ -44,13 +44,13 @@
 	},
 	"homepage": "https://github.com/default-js/defaultjs-html-form-extfields#readme",
 	"dependencies": {
-		"@default-js/defaultjs-common-utils": "^0.6.0",
-		"@default-js/defaultjs-dynamic-requester": "^1.0.0-beta.3",
-		"@default-js/defaultjs-expression-language": "^1.0.0-beta.12",
-		"@default-js/defaultjs-extdom": "^1.0.0-beta.25",
-		"@default-js/defaultjs-html-components": "^1.0.0-beta.3",
-		"@default-js/defaultjs-html-form": "^1.0.0-beta.2",
-		"@default-js/defaultjs-template-language": "^1.0.0-beta.15"
+		"@default-js/defaultjs-common-utils": "latest",
+		"@default-js/defaultjs-dynamic-requester": "latest",
+		"@default-js/defaultjs-expression-language": "latest",
+		"@default-js/defaultjs-extdom": "latest",
+		"@default-js/defaultjs-html-components": "latest",
+		"@default-js/defaultjs-html-form": "latest",
+		"@default-js/defaultjs-template-language": "latest"
 	},
 	"directories": {
 		"test": "test"
